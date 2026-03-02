@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VLanSim - VLAN 拓扑模拟器</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>VLanSim</h1>
+      <p>轻量可视化 VLAN 学习模拟器（纯 HTML/CSS/JS）</p>
+    </header>
+
+    <div class="toolbar panel" id="topToolbar">
+      <div class="toolbar-group" id="devicePalette"></div>
+      <div class="toolbar-group">
+        <button id="connectModeBtn">连接模式：关闭</button>
+        <button id="clearBtn" class="danger">清空拓扑</button>
+      </div>
+      <p class="muted tip">提示：开启连接模式后，依次点击两个端口即可连线（一个端口只能连接一条链路）。</p>
+    </div>
+
+    <main>
+      <aside class="panel" id="leftPanel">
+        <h2>流向模拟</h2>
+        <label class="field"><span>源设备</span><select id="simDeviceSelect"></select></label>
+        <label class="field"><span>源端口</span><select id="simPortSelect"></select></label>
+        <label class="field"><span>目的设备</span><select id="simDstDeviceSelect"></select></label>
+        <label class="field"><span>目的端口</span><select id="simDstPortSelect"></select></label>
+        <label class="field"><span>VLAN ID</span><input id="simVlanInput" type="number" min="1" max="4094" /></label>
+        <button id="runSimBtn">运行模拟</button>
+
+        <h2>模拟结果</h2>
+        <ol id="simLog" class="log"></ol>
+      </aside>
+
+      <section id="workspace">
+        <div id="canvas" aria-label="拓扑画布"></div>
+        <svg id="linkLayer"></svg>
+      </section>
+
+      <aside class="panel" id="rightPanel">
+        <h2>设备配置</h2>
+        <div id="deviceConfig" class="muted">请选择一个设备进行配置</div>
+      </aside>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
