@@ -1,189 +1,57 @@
 :root {
-  --bg: #0f172a;
-  --panel: #111827;
-  --canvas: #1e293b;
-  --text: #e5e7eb;
-  --muted: #94a3b8;
-  --accent: #38bdf8;
-  --danger: #f87171;
-  --ok: #34d399;
+  --bg: #f3f6fb;
+  --panel: #ffffff;
+  --canvas: #f8fbff;
+  --line: #d8e1ee;
+  --text: #1f2a37;
+  --muted: #6b7b90;
+  --accent: #2f6df6;
+  --danger: #e45757;
+  --success: #1f9d6a;
 }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Inter", "Segoe UI", "PingFang SC", sans-serif; background: var(--bg); color: var(--text); }
+header { padding: 10px 14px 8px; border-bottom: 1px solid var(--line); background: #fff; }
+header h1 { margin: 0; font-size: 1.1rem; }
+header p { margin: 2px 0 0; color: var(--muted); font-size: 0.84rem; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+.toolbar { margin: 8px 10px 0; padding: 8px; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+.toolbar-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.toolbar button { width: auto; min-width: 96px; }
+main { height: calc(100vh - 128px); display: grid; grid-template-columns: 280px 1fr 360px; gap: 8px; padding: 8px 10px 10px; }
+h2 { margin: 0 0 8px; font-size: 0.92rem; }
+button, select, input { border: 1px solid #cad6e7; border-radius: 7px; padding: 6px 8px; background: #fff; color: var(--text); font-size: 0.82rem; width: 100%; }
+button { cursor: pointer; }
+button:hover { border-color: #a8bedf; }
+.danger { border-color: #f0bbbb; color: #b73e3e; }
+.field { display: grid; grid-template-columns: 76px 1fr; align-items: center; gap: 8px; margin: 6px 0; }
+.field > span { color: var(--muted); font-size: 0.78rem; text-align: left; }
+.tip { margin: 0; font-size: 0.78rem; grid-column: 1 / -1; }
+.muted { color: var(--muted); }
+#leftPanel, #rightPanel { padding: 8px; overflow: auto; }
+#workspace { position: relative; border: 1px solid var(--line); border-radius: 10px; background: var(--canvas); overflow: hidden; }
+#canvas, #linkLayer { position: absolute; inset: 0; }
+#linkLayer { pointer-events: none; z-index: 3; }
+#canvas { z-index: 1; }
+.device { position: absolute; width: 176px; border: 1px solid #c9d8ec; border-radius: 9px; background: #fff; padding: 7px; box-shadow: 0 1px 6px rgba(12, 26, 75, 0.06); cursor: grab; }
+.device.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(47, 109, 246, 0.14); }
+.device-head { display: flex; align-items: center; gap: 6px; }
+.brand-logo { width: 16px; height: 16px; object-fit: contain; }
+.device .title { font-size: 0.84rem; font-weight: 600; line-height: 1.2; }
+.device .meta { color: var(--muted); font-size: 0.7rem; margin-top: 1px; }
+.port-list { margin-top: 6px; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 4px; }
+.port { font-size: 0.7rem; padding: 4px; border-radius: 6px; border: 1px solid #c5d5ea; background: #f9fbff; display: grid; text-align: left; gap: 2px; }
+.policy-badge { color: #5f6f89; font-size: 0.62rem; line-height: 1.1; }
+.section { border: 1px solid var(--line); border-radius: 8px; padding: 7px; margin: 6px 0; background: #fcfdff; }
+.section h3 { margin: 0 0 4px; font-size: 0.8rem; }
+.port-row { border: 1px solid #d7e2f0; border-radius: 7px; padding: 6px; margin-bottom: 6px; background: #fff; }
+.port-row-title { font-size: 0.74rem; color: #35507a; margin-bottom: 4px; font-weight: 600; }
+.inline-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 4px; }
+.log { margin: 0; padding-left: 16px; font-size: 0.78rem; line-height: 1.35; }
+.log li { margin-bottom: 6px; }
+.success { color: var(--success); }
+.fail { color: var(--danger); }
+.link-line { pointer-events: stroke; cursor: pointer; }
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: "Segoe UI", "PingFang SC", sans-serif;
-  background: var(--bg);
-  color: var(--text);
-}
-
-header {
-  padding: 0.8rem 1rem;
-  border-bottom: 1px solid #334155;
-}
-
-header h1 {
-  margin: 0;
-}
-
-header p {
-  margin: 0.2rem 0 0;
-  color: var(--muted);
-}
-
-main {
-  display: grid;
-  grid-template-columns: 280px 1fr 360px;
-  gap: 0.75rem;
-  height: calc(100vh - 90px);
-  padding: 0.75rem;
-}
-
-.panel {
-  background: var(--panel);
-  border: 1px solid #334155;
-  border-radius: 12px;
-  padding: 0.75rem;
-  overflow: auto;
-}
-
-h2 {
-  font-size: 1rem;
-  margin: 0.5rem 0;
-}
-
-.palette {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.4rem;
-}
-
-.palette button,
-.actions button,
-.panel select,
-.panel input {
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #475569;
-  background: #0b1220;
-  color: var(--text);
-  padding: 0.45rem 0.55rem;
-}
-
-.actions {
-  display: grid;
-  gap: 0.45rem;
-}
-
-.primary {
-  border-color: var(--accent);
-}
-
-.danger {
-  border-color: var(--danger);
-}
-
-label {
-  display: block;
-  margin: 0.4rem 0;
-  color: var(--muted);
-  font-size: 0.88rem;
-}
-
-#workspace {
-  position: relative;
-  border-radius: 12px;
-  border: 1px solid #334155;
-  background: var(--canvas);
-  overflow: hidden;
-}
-
-#linkLayer,
-#canvas {
-  position: absolute;
-  inset: 0;
-}
-
-#linkLayer {
-  pointer-events: none;
-}
-
-.device {
-  position: absolute;
-  width: 145px;
-  border: 1px solid #64748b;
-  border-radius: 10px;
-  padding: 0.45rem;
-  background: #0b1220;
-  cursor: grab;
-}
-
-.device.selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35);
-}
-
-.device .title {
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.device .meta {
-  color: var(--muted);
-  font-size: 0.75rem;
-}
-
-.port-list {
-  margin-top: 0.35rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.25rem;
-}
-
-.port {
-  border: 1px solid #475569;
-  border-radius: 6px;
-  font-size: 0.72rem;
-  text-align: center;
-  padding: 0.2rem;
-}
-
-.muted {
-  color: var(--muted);
-}
-
-.port-row {
-  margin: 0.3rem 0;
-  border: 1px solid #334155;
-  border-radius: 8px;
-  padding: 0.4rem;
-  display: grid;
-  gap: 0.25rem;
-  background: #0b1220;
-}
-
-.port-name {
-  font-size: 0.8rem;
-  color: var(--accent);
-}
-
-.log {
-  font-size: 0.86rem;
-  line-height: 1.45;
-  padding-left: 1.1rem;
-}
-
-.log li {
-  margin-bottom: 0.45rem;
-}
-
-.success {
-  color: var(--ok);
-}
-
-.fail {
-  color: var(--danger);
-}
+.port-id { pointer-events: none; }
+.policy-badge { pointer-events: none; }
