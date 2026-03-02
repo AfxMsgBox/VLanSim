@@ -1,0 +1,189 @@
+:root {
+  --bg: #0f172a;
+  --panel: #111827;
+  --canvas: #1e293b;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --accent: #38bdf8;
+  --danger: #f87171;
+  --ok: #34d399;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "PingFang SC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #334155;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+}
+
+main {
+  display: grid;
+  grid-template-columns: 280px 1fr 360px;
+  gap: 0.75rem;
+  height: calc(100vh - 90px);
+  padding: 0.75rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 0.75rem;
+  overflow: auto;
+}
+
+h2 {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+.palette {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem;
+}
+
+.palette button,
+.actions button,
+.panel select,
+.panel input {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #475569;
+  background: #0b1220;
+  color: var(--text);
+  padding: 0.45rem 0.55rem;
+}
+
+.actions {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.primary {
+  border-color: var(--accent);
+}
+
+.danger {
+  border-color: var(--danger);
+}
+
+label {
+  display: block;
+  margin: 0.4rem 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+#workspace {
+  position: relative;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: var(--canvas);
+  overflow: hidden;
+}
+
+#linkLayer,
+#canvas {
+  position: absolute;
+  inset: 0;
+}
+
+#linkLayer {
+  pointer-events: none;
+}
+
+.device {
+  position: absolute;
+  width: 145px;
+  border: 1px solid #64748b;
+  border-radius: 10px;
+  padding: 0.45rem;
+  background: #0b1220;
+  cursor: grab;
+}
+
+.device.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35);
+}
+
+.device .title {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.device .meta {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.port-list {
+  margin-top: 0.35rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+}
+
+.port {
+  border: 1px solid #475569;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  text-align: center;
+  padding: 0.2rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.port-row {
+  margin: 0.3rem 0;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.4rem;
+  display: grid;
+  gap: 0.25rem;
+  background: #0b1220;
+}
+
+.port-name {
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+
+.log {
+  font-size: 0.86rem;
+  line-height: 1.45;
+  padding-left: 1.1rem;
+}
+
+.log li {
+  margin-bottom: 0.45rem;
+}
+
+.success {
+  color: var(--ok);
+}
+
+.fail {
+  color: var(--danger);
+}

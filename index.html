@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VLanSim - VLAN 拓扑模拟器</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>VLanSim</h1>
+      <p>纯 HTML/CSS/JS 的 VLAN 拓扑编辑与流向模拟工具</p>
+    </header>
+
+    <main>
+      <aside class="panel" id="leftPanel">
+        <h2>设备库</h2>
+        <div id="devicePalette" class="palette"></div>
+
+        <h2>操作</h2>
+        <div class="actions">
+          <button id="connectModeBtn">连接模式：关闭</button>
+          <button id="runSimBtn" class="primary">运行流向模拟</button>
+          <button id="clearBtn" class="danger">清空拓扑</button>
+        </div>
+
+        <h2>模拟参数</h2>
+        <label>
+          源设备
+          <select id="srcDevice"></select>
+        </label>
+        <label>
+          源端口
+          <select id="srcPort"></select>
+        </label>
+        <label>
+          VLAN ID
+          <input id="vlanInput" type="number" min="1" max="4094" value="10" />
+        </label>
+      </aside>
+
+      <section id="workspace">
+        <svg id="linkLayer"></svg>
+        <div id="canvas" aria-label="拓扑画布"></div>
+      </section>
+
+      <aside class="panel" id="rightPanel">
+        <h2>设备配置</h2>
+        <div id="deviceConfig" class="muted">请选择一个设备进行配置</div>
+
+        <h2>模拟结果</h2>
+        <ol id="simLog" class="log"></ol>
+      </aside>
+    </main>
+
+    <template id="portRowTemplate">
+      <div class="port-row">
+        <span class="port-name"></span>
+        <select class="port-mode">
+          <option value="access">access</option>
+          <option value="trunk">trunk</option>
+        </select>
+        <input class="port-access-vlan" type="number" min="1" max="4094" value="1" />
+        <input
+          class="port-allowed"
+          type="text"
+          value="1,10,20"
+          placeholder="trunk 允许 VLAN，如 1,10,20"
+        />
+      </div>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
