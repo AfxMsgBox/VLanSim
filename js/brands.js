@@ -346,6 +346,81 @@ const BRAND_STRATEGIES = {
     modeTrunkValues: ["trunk"],
   },
 
+  // ===== Mikrotik SwOS =====
+  // CSS-series switches running SwOS. Simplified per-port VLAN table model.
+  // Each port has a PVID (for untagged ingress), a list of tagged trunk VLANs,
+  // and an untagEgress flag (strip tag on egress for the pvid VLAN).
+  "Mikrotik SwOS": {
+    evaluate(device, p, vlan, direction) {
+      const sw = p.swos;
+      const allowed = [...new Set([sw.pvid, ...(sw.vlans ?? [])])].filter(Boolean);
+
+      if (direction === "ingress") {
+        if (!allowed.includes(vlan))
+          return {
+            ok: false,
+            reason: `SwOS 端口不允许 VLAN ${vlan}（pvid=${sw.pvid}，trunk=${(sw.vlans ?? []).join(",") || "无"}）`,
+            fix: suggest(`将 VLAN ${vlan} 设为 PVID，或加入 Tagged VLANs`),
+          };
+        return { ok: true, reason: `SwOS VLAN ${vlan} 允许入方向（pvid=${sw.pvid}）` };
+      }
+
+      // Egress
+      if (!allowed.includes(vlan))
+        return {
+          ok: false,
+          reason: `SwOS 端口出方向不允许 VLAN ${vlan}`,
+          fix: suggest(`将 VLAN ${vlan} 加入 Tagged VLANs 或改为 PVID`),
+        };
+      return { ok: true, reason: `SwOS VLAN ${vlan} 允许出方向` };
+    },
+
+    getCanonical(p) {
+      const sw = p.swos;
+      return {
+        pvid:                sw.pvid ?? 1,
+        untaggedVlans:       sw.untagEgress !== false ? [sw.pvid ?? 1] : [],
+        taggedVlans:         [...(sw.vlans ?? [])],
+        ingressFiltering:    true,
+        acceptableFrameTypes: "admit-all",
+      };
+    },
+
+    applyCanonical(p, c) {
+      if (!p.swos) p.swos = {};
+      p.swos.pvid        = c.pvid;
+      p.swos.vlans       = [...c.taggedVlans];
+      p.swos.untagEgress = c.untaggedVlans.includes(c.pvid);
+    },
+
+    summary(p) {
+      const sw = p.swos;
+      if (!(sw.vlans ?? []).length) return `A:${sw.pvid ?? "-"}`;
+      return `T:${sw.vlans.join("/") || "-"}`;
+    },
+
+    editorMarkup(p) {
+      const sw = p.swos;
+      return `
+        <label class="field">
+          <span>PVID <span class="field-hint" title="Port VLAN ID：未打标帧入方向归入此 VLAN（SwOS：VLAN ID 字段）">?</span></span>
+          <input data-key="swos.pvid" type="number" min="1" max="4094" value="${sw.pvid ?? ""}" />
+        </label>
+        <label class="field">
+          <span>Tagged VLANs <span class="field-hint" title="此端口允许通过的 tagged VLAN 列表（SwOS VLAN 表成员），逗号分隔">?</span></span>
+          <input data-key="swos.vlans" value="${(sw.vlans ?? []).join(",")}" />
+        </label>
+        <label class="field">
+          <span>Untag Egress <span class="field-hint" title="出方向对 PVID VLAN 去标签（SwOS：egress 设为 untagged）">?</span></span>
+          <input data-key="swos.untagEgress" type="checkbox" ${sw.untagEgress !== false ? "checked" : ""} />
+        </label>`;
+    },
+
+    modeKey:         null,   // SwOS has no explicit mode selector
+    modeAccessValue: null,
+    modeTrunkValues: [],
+  },
+
   // ===== Generic (IEEE 802.1Q Standard) =====
   // Follows the IEEE 802.1Q standard directly. Also serves as the canonical
   // intermediate format for cross-brand port configuration conversion.

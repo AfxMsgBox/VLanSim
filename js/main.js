@@ -55,7 +55,7 @@ $("clearBtn").addEventListener("click", () => {
   state.selectedDeviceId = null;
   state.connectMode      = false;
   state.pendingLinkStart = null;
-  state.sim = { srcDeviceId: "", srcPortId: "", dstDeviceId: "", dstPortId: "", vlanId: "" };
+  state.sim = { srcDeviceId: "", srcPortId: "", dstDeviceId: "", dstPortId: "", vlanId: "", resultPath: null };
   document.body.classList.remove("connect-mode-active");
   $("connectModeBtn").textContent = "连接模式：关闭";
   $("connectModeBtn").classList.remove("active");
@@ -65,6 +65,19 @@ $("clearBtn").addEventListener("click", () => {
 
 // Re-render links on window resize (SVG viewBox update)
 window.addEventListener("resize", () => renderLinks());
+
+// ESC key — exit connect mode
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && state.connectMode) {
+    state.connectMode      = false;
+    state.pendingLinkStart = null;
+    const btn = $("connectModeBtn");
+    btn.textContent = "连接模式：关闭";
+    btn.classList.remove("active");
+    document.body.classList.remove("connect-mode-active");
+    renderDevices();
+  }
+});
 
 // Initialize on page load
 addPalette();

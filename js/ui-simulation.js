@@ -2,12 +2,16 @@
 // Simulation control panel (left sidebar): device/port selects, VLAN input, log output
 // Depends on: constants.js, brands.js, state.js, simulation.js
 
-// Append a log entry. cls: "success" | "fail" | "" (info)
+// Append a log entry. cls: "success" | "fail" | "" (info) | "separator"
 function pushLog(text, cls) {
   const log = $("simLog");
   const li  = document.createElement("li");
-  li.textContent = text;
-  if (cls) li.className = cls;
+  if (cls === "separator") {
+    li.className = "separator";
+  } else {
+    li.textContent = text;
+    if (cls) li.className = cls;
+  }
   log.appendChild(li);
   log.scrollTop = log.scrollHeight;
 }
@@ -24,8 +28,8 @@ function renderSimulationPanel() {
   }
 
   function fillPortSelect(elId, deviceId, currentVal) {
-    const el   = $(elId);
-    const d    = dev(deviceId);
+    const el = $(elId);
+    const d  = dev(deviceId);
     el.innerHTML = (d?.ports ?? [])
       .map((p) => `<option value="${p.id}" ${p.id === currentVal ? "selected" : ""}>${p.id}</option>`)
       .join("");
@@ -37,8 +41,7 @@ function renderSimulationPanel() {
   fillPortSelect("simDstPortSelect", state.sim.dstDeviceId, state.sim.dstPortId);
 }
 
-// Bind all interaction events on the simulation panel.
-// Call once on startup; safe to call again — replaces listeners each time.
+// Bind all interaction events on the simulation panel. Call once on startup.
 function bindSimulationPanel() {
   const srcDevSel  = $("simDeviceSelect");
   const srcPortSel = $("simPortSelect");
@@ -46,8 +49,8 @@ function bindSimulationPanel() {
   const dstPortSel = $("simDstPortSelect");
   const vlanInput  = $("simVlanInput");
   const runBtn     = $("runSimBtn");
+  const clearBtn   = $("clearLogBtn");
 
-  // Sync state from current DOM values
   function syncFromDOM() {
     state.sim.srcDeviceId = srcDevSel.value;
     state.sim.srcPortId   = srcPortSel.value;
@@ -55,7 +58,6 @@ function bindSimulationPanel() {
     state.sim.dstPortId   = dstPortSel.value;
   }
 
-  // Source device change → repopulate source port select
   srcDevSel.addEventListener("change", () => {
     state.sim.srcDeviceId = srcDevSel.value;
     const d = dev(state.sim.srcDeviceId);
@@ -63,13 +65,11 @@ function bindSimulationPanel() {
     renderSimulationPanel();
   });
 
-  // Source port change
   srcPortSel.addEventListener("change", () => {
     state.sim.srcPortId = srcPortSel.value;
     syncFromDOM();
   });
 
-  // Destination device change → repopulate destination port select
   dstDevSel.addEventListener("change", () => {
     state.sim.dstDeviceId = dstDevSel.value;
     const d = dev(state.sim.dstDeviceId);
@@ -77,13 +77,12 @@ function bindSimulationPanel() {
     renderSimulationPanel();
   });
 
-  // Destination port change
   dstPortSel.addEventListener("change", () => {
     state.sim.dstPortId = dstPortSel.value;
     syncFromDOM();
   });
 
-  // B3: Real-time VLAN ID validation — add/remove .input-error class
+  // B3: Real-time VLAN ID validation
   vlanInput.addEventListener("input", () => {
     const v = Number(vlanInput.value);
     const valid = Number.isInteger(v) && v >= 1 && v <= 4094;
@@ -92,7 +91,6 @@ function bindSimulationPanel() {
     state.sim.vlanId = vlanInput.value;
   });
 
-  // Preserve vlanId on blur too
   vlanInput.addEventListener("change", () => {
     state.sim.vlanId = vlanInput.value;
   });
@@ -100,6 +98,14 @@ function bindSimulationPanel() {
   runBtn.addEventListener("click", () => {
     syncFromDOM();
     state.sim.vlanId = vlanInput.value;
+    // Insert a visual separator before each run (if log already has entries)
+    if ($("simLog").children.length > 0) pushLog("", "separator");
     runSimulation();
+  });
+
+  clearBtn.addEventListener("click", () => {
+    $("simLog").innerHTML = "";
+    state.sim.resultPath = null;
+    renderLinks();
   });
 }

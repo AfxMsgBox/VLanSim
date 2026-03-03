@@ -68,6 +68,13 @@ function createPort(index) {
       ingressFiltering: true,
     },
 
+    // Mikrotik SwOS (CSS series) — simplified per-port VLAN table model
+    swos: {
+      pvid:        1,    // Port VLAN ID — untagged ingress frames get this VLAN
+      vlans:       [],   // Tagged VLANs allowed on this port (trunk membership)
+      untagEgress: true, // Strip tag on egress for the pvid VLAN
+    },
+
     // Generic (IEEE 802.1Q standard) — also the canonical conversion format
     generic: {
       pvid:                 1,
@@ -99,5 +106,5 @@ const state = {
   selectedDeviceId: null,
   connectMode:      false,
   pendingLinkStart: null,
-  sim: { srcDeviceId: "", srcPortId: "", dstDeviceId: "", dstPortId: "", vlanId: "" },
+  sim: { srcDeviceId: "", srcPortId: "", dstDeviceId: "", dstPortId: "", vlanId: "", resultPath: null },
 };

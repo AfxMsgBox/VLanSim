@@ -29,8 +29,18 @@ function neighbor(deviceId, portId) {
 // B1 fix: visited set tracks device IDs (not port IDs) to prevent infinite loops
 //         in ring topologies (A→B→C→A).
 // B3 fix: VLAN ID is validated early with a clear error message.
+// Find the link object connecting deviceId:portId to its neighbor (or null).
+function neighborLink(deviceId, portId) {
+  return state.links.find(
+    (l) =>
+      (l.a.deviceId === deviceId && l.a.portId === portId) ||
+      (l.b.deviceId === deviceId && l.b.portId === portId)
+  ) ?? null;
+}
+
 function runSimulation() {
   $("simLog").innerHTML = "";
+  state.sim.resultPath = null;  // clear previous path highlight
 
   // B3: Validate VLAN ID before anything else
   const vlan = Number(state.sim.vlanId);
@@ -61,20 +71,24 @@ function runSimulation() {
     return;
   }
 
-  const firstHop = neighbor(srcDevice.id, srcPort.id);
-  if (!firstHop) {
+  const firstLink = neighborLink(srcDevice.id, srcPort.id);
+  if (!firstLink) {
     pushLog(`✗ 阻断：${srcDevice.name}:${srcPort.id} 没有物理链路。${suggest("先把起点端口连接到下游设备")}`, "fail");
     return;
   }
 
+  const firstHop    = firstLink.a.deviceId === srcDevice.id && firstLink.a.portId === srcPort.id
+    ? firstLink.b : firstLink.a;
   const firstDevice = dev(firstHop.deviceId);
+
   pushLog(`→ 开始模拟：VLAN ${vlan}，${srcDevice.name}:${srcPort.id} → ${dstDevice.name}:${dstPort.id}`);
   pushLog(`→ 出发：${srcDevice.name}:${srcPort.id} → ${firstDevice?.name ?? firstHop.deviceId}:${firstHop.portId}（${srcOut.reason}）`);
 
   const queue = [{
     deviceId:      firstHop.deviceId,
     ingressPortId: firstHop.portId,
-    path: [`${srcDevice.name}:${srcPort.id}`, `${firstDevice?.name ?? firstHop.deviceId}:${firstHop.portId}`],
+    path:    [`${srcDevice.name}:${srcPort.id}`, `${firstDevice?.name ?? firstHop.deviceId}:${firstHop.portId}`],
+    linkIds: [firstLink.id],
   }];
 
   // B1: Device-level visited set — prevents revisiting devices in ring topologies
@@ -105,6 +119,8 @@ function runSimulation() {
 
     if (current.id === dstDevice.id && ingress.id === dstPort.id) {
       pushLog(`✓ 到达终点：${node.path.join(" → ")}`, "success");
+      state.sim.resultPath = new Set(node.linkIds);
+      renderLinks();
       return;
     }
 
@@ -124,8 +140,7 @@ function runSimulation() {
         return;
       }
 
-      // B4: Defensive null check — neighbor() should not return null here
-      //     (the port was pre-filtered above), but guard anyway.
+      // B4: Defensive null check
       const nb = neighbor(current.id, egress.id);
       if (!nb) return;
 
@@ -135,11 +150,13 @@ function runSimulation() {
         return;
       }
 
+      const egressLink = neighborLink(current.id, egress.id);
       pushLog(`→ 转发：${current.name}:${egress.id} → ${nextDevice.name}:${nb.portId}（${out.reason}）`);
       queue.push({
         deviceId:      nextDevice.id,
         ingressPortId: nb.portId,
         path:          [...node.path, `${nextDevice.name}:${nb.portId}`],
+        linkIds:       egressLink ? [...node.linkIds, egressLink.id] : node.linkIds,
       });
     });
   }
