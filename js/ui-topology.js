@@ -157,9 +157,11 @@ function renderLinks() {
     const strokeColor = isOnPath ? "#1a9560" : "#4a7fff";
     const strokeWidth = isOnPath ? "3" : "2";
 
-    // Orthogonal elbow routing: A → midX (horizontal) → b.y (vertical) → B
-    const midX  = (a.x + b.x) / 2;
-    const pathD = `M ${a.x} ${a.y} H ${midX} V ${b.y} H ${b.x}`;
+    // Cubic bezier S-curve: control points extend vertically from each port centre
+    // so lines from different ports on the same device diverge immediately,
+    // preventing visual overlap even when ports are adjacent.
+    const midY  = (a.y + b.y) / 2;
+    const pathD = `M ${a.x} ${a.y} C ${a.x} ${midY} ${b.x} ${midY} ${b.x} ${b.y}`;
 
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("d", pathD);
@@ -167,7 +169,6 @@ function renderLinks() {
     path.setAttribute("stroke", strokeColor);
     path.setAttribute("stroke-width", strokeWidth);
     path.setAttribute("stroke-linecap", "round");
-    path.setAttribute("stroke-linejoin", "round");
     path.setAttribute("class", "link-line");
     path.style.pointerEvents = "stroke";
 
