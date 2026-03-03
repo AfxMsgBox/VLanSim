@@ -8,8 +8,19 @@ function portSummary(d, p) {
   return strategy ? strategy.summary(p) : "-";
 }
 
+// Return a CSS class for the port's current mode (access / trunk / general / "")
+function portModeClass(device, port) {
+  const strategy = BRAND_STRATEGIES[device.brand];
+  if (!strategy?.modeKey) return "";
+  const val = strategy.modeKey.split(".").reduce((o, k) => o?.[k], port);
+  if (!val) return "";
+  if (val === strategy.modeAccessValue) return "port-access";
+  if (strategy.modeTrunkValues?.includes(val)) return "port-trunk";
+  return "";
+}
+
 function renderDevices() {
-  const canvas    = $("canvas");
+  const canvas = $("canvas");
   canvas.innerHTML = "";
 
   state.devices.forEach((d) => {
@@ -23,9 +34,11 @@ function renderDevices() {
         state.pendingLinkStart &&
         state.pendingLinkStart.deviceId === d.id &&
         state.pendingLinkStart.portId   === p.id;
-      const summary = portSummary(d, p);
+      const summary   = portSummary(d, p);
+      const modeClass = portModeClass(d, p);
+      const classes   = ["port", modeClass, isPending ? "pending-start" : ""].filter(Boolean).join(" ");
       return `<button
-        class="port${isPending ? " pending-start" : ""}"
+        class="${classes}"
         data-device-id="${d.id}"
         data-port-id="${p.id}"
         title="${d.brand} ${p.id}：${summary}"
@@ -35,10 +48,14 @@ function renderDevices() {
     card.innerHTML = `
       <div class="device-head">
         <img class="brand-logo" src="${BRAND_LOGOS[d.brand] ?? BRAND_LOGOS.Generic}" alt="${d.brand}" />
-        <div class="title">${d.name}</div>
+        <div>
+          <div class="title">${d.name}</div>
+          <div class="meta">${DEVICE_TYPES[d.type].label} · ${d.brand}</div>
+        </div>
       </div>
-      <div class="meta">${DEVICE_TYPES[d.type].label} · ${d.brand}</div>
-      <div class="port-list">${portButtons}</div>
+      <div class="device-body">
+        <div class="port-list">${portButtons}</div>
+      </div>
     `;
 
     card.addEventListener("click", () => {
@@ -67,7 +84,7 @@ function renderDevices() {
     canvas.appendChild(card);
   });
 
-  // Port click handler — used for connect mode
+  // Port click handler — connect mode
   canvas.querySelectorAll(".port").forEach((button) => {
     button.addEventListener("click", (ev) => {
       ev.stopPropagation();
@@ -79,7 +96,7 @@ function renderDevices() {
         state.pendingLinkStart = next;
         const dName = dev(next.deviceId)?.name ?? next.deviceId;
         pushLog(`→ 已选择起点 ${dName}:${next.portId}`);
-        renderDevices(); // re-render to show pending-start highlight
+        renderDevices();
         return;
       }
 
@@ -136,43 +153,47 @@ function renderLinks() {
     const b = getPortCenter(l.b.deviceId, l.b.portId);
     if (!a || !b) return;
 
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", String(a.x));
-    line.setAttribute("y1", String(a.y));
-    line.setAttribute("x2", String(b.x));
-    line.setAttribute("y2", String(b.y));
-    line.setAttribute("stroke", "#3f7bff");
-    line.setAttribute("stroke-width", "2");
-    line.setAttribute("class", "link-line");
-    line.style.pointerEvents = "stroke";
+    const isOnPath    = state.sim.resultPath?.has(l.id) ?? false;
+    const strokeColor = isOnPath ? "#1a9560" : "#4a7fff";
+    const strokeWidth = isOnPath ? "3" : "2";
 
-    // U3: Hover highlight to indicate deletability
-    line.addEventListener("mouseenter", () => line.setAttribute("stroke", "#e45757"));
-    line.addEventListener("mouseleave", () => line.setAttribute("stroke", "#3f7bff"));
+    // Orthogonal elbow routing: A → midX (horizontal) → b.y (vertical) → B
+    const midX  = (a.x + b.x) / 2;
+    const pathD = `M ${a.x} ${a.y} H ${midX} V ${b.y} H ${b.x}`;
 
-    // U3: Confirm before deleting a link
-    line.addEventListener("click", (ev) => {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", pathD);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", strokeColor);
+    path.setAttribute("stroke-width", strokeWidth);
+    path.setAttribute("stroke-linecap", "round");
+    path.setAttribute("stroke-linejoin", "round");
+    path.setAttribute("class", "link-line");
+    path.style.pointerEvents = "stroke";
+
+    path.addEventListener("mouseenter", () => {
+      path.setAttribute("stroke", "#e04545");
+      path.setAttribute("stroke-width", "3");
+    });
+    path.addEventListener("mouseleave", () => {
+      path.setAttribute("stroke", strokeColor);
+      path.setAttribute("stroke-width", strokeWidth);
+    });
+
+    // Confirm before deleting
+    path.addEventListener("click", (ev) => {
       ev.stopPropagation();
       const da = dev(l.a.deviceId), db = dev(l.b.deviceId);
       const aLabel = `${da?.name ?? l.a.deviceId}:${l.a.portId}`;
       const bLabel = `${db?.name ?? l.b.deviceId}:${l.b.portId}`;
       if (!confirm(`删除连线 ${aLabel} ↔ ${bLabel}？`)) return;
       state.links = state.links.filter((x) => x.id !== l.id);
+      // Clear path highlight if this link was on the result path
+      if (state.sim.resultPath?.has(l.id)) state.sim.resultPath = null;
       pushLog(`→ 已删除连线 ${aLabel} ↔ ${bLabel}`);
       renderLinks();
     });
 
-    const da = dev(l.a.deviceId), db = dev(l.b.deviceId);
-    const pa = getPort(da, l.a.portId), pb = getPort(db, l.b.portId);
-    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.textContent = `${l.a.portId}:${portSummary(da, pa)} ↔ ${l.b.portId}:${portSummary(db, pb)}`;
-    text.setAttribute("x", String((a.x + b.x) / 2));
-    text.setAttribute("y", String((a.y + b.y) / 2 - 4));
-    text.setAttribute("font-size", "10");
-    text.setAttribute("fill", "#5f6f89");
-    text.setAttribute("text-anchor", "middle");
-    text.style.pointerEvents = "none";
-
-    linkLayer.append(line, text);
+    linkLayer.append(path);
   });
 }

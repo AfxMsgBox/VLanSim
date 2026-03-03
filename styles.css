@@ -1,80 +1,251 @@
 :root {
-  --bg: #f3f6fb;
-  --panel: #ffffff;
-  --canvas: #f8fbff;
-  --line: #d8e1ee;
-  --text: #1f2a37;
-  --muted: #6b7b90;
-  --accent: #2f6df6;
-  --danger: #e45757;
-  --success: #1f9d6a;
+  --bg:          #eef1f6;
+  --panel:       #ffffff;
+  --canvas:      #f4f7fc;
+  --canvas-dot:  #c8d4e6;
+  --line:        #dde3ee;
+  --line-strong: #c6d3e5;
+  --text:        #18253a;
+  --text-soft:   #475470;
+  --muted:       #6c7d96;
+  --accent:      #2f6df6;
+  --accent-dark: #1e52c8;
+  --accent-bg:   rgba(47,109,246,0.09);
+  --danger:      #e04545;
+  --danger-bg:   rgba(224,69,69,0.09);
+  --success:     #1a9560;
+  --success-bg:  rgba(26,149,96,0.09);
+  --warning:     #d97f1a;
+  --warning-bg:  rgba(217,127,26,0.09);
+  --shadow:      0 2px 8px rgba(15,30,70,0.10), 0 1px 2px rgba(15,30,70,0.06);
+  --shadow-sm:   0 1px 3px rgba(15,30,70,0.08);
+  --radius:      10px;
+  --radius-sm:   6px;
 }
+
 * { box-sizing: border-box; }
-body { margin: 0; font-family: "Inter", "Segoe UI", "PingFang SC", sans-serif; background: var(--bg); color: var(--text); }
-header { padding: 10px 14px 8px; border-bottom: 1px solid var(--line); background: #fff; }
-header h1 { margin: 0; font-size: 1.1rem; }
-header p { margin: 2px 0 0; color: var(--muted); font-size: 0.84rem; }
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
-.toolbar { margin: 8px 10px 0; padding: 8px; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
-.toolbar-group { display: flex; gap: 6px; flex-wrap: wrap; }
-.toolbar button { width: auto; min-width: 96px; }
-main { height: calc(100vh - 128px); display: grid; grid-template-columns: 280px 1fr 360px; gap: 8px; padding: 8px 10px 10px; }
-h2 { margin: 0 0 8px; font-size: 0.92rem; }
-button, select, input { border: 1px solid #cad6e7; border-radius: 7px; padding: 6px 8px; background: #fff; color: var(--text); font-size: 0.82rem; width: 100%; }
-button { cursor: pointer; }
-button:hover { border-color: #a8bedf; }
-.danger { border-color: #f0bbbb; color: #b73e3e; }
-.field { display: grid; grid-template-columns: 76px 1fr; align-items: center; gap: 8px; margin: 6px 0; }
-.field > span { color: var(--muted); font-size: 0.78rem; text-align: left; }
-.tip { margin: 0; font-size: 0.78rem; grid-column: 1 / -1; }
-.muted { color: var(--muted); }
-#leftPanel, #rightPanel { padding: 8px; overflow: auto; }
-#workspace { position: relative; border: 1px solid var(--line); border-radius: 10px; background: var(--canvas); overflow: hidden; }
+
+body {
+  margin: 0;
+  font-family: "Inter", "Segoe UI", "PingFang SC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+/* ── Header ── */
+header {
+  padding: 10px 16px 9px;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+header h1 { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; }
+header p  { margin: 0; color: var(--muted); font-size: 0.78rem; }
+
+/* ── Panels ── */
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+
+/* ── Toolbar ── */
+.toolbar {
+  margin: 8px 10px 0;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.toolbar-group { display: flex; gap: 5px; flex-wrap: wrap; }
+.toolbar-divider { width: 1px; height: 22px; background: var(--line); margin: 0 2px; }
+.tip { margin: 0; font-size: 0.75rem; color: var(--muted); flex: 1 1 100%; padding-top: 2px; }
+
+/* ── 3-column layout ── */
+main {
+  height: calc(100vh - 120px);
+  display: grid;
+  grid-template-columns: 268px 1fr 348px;
+  gap: 8px;
+  padding: 8px 10px 10px;
+}
+
+/* ── Buttons / inputs / selects ── */
+button, select, input {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  background: #fff;
+  color: var(--text);
+  font-size: 0.8rem;
+  width: 100%;
+  font-family: inherit;
+}
+button { cursor: pointer; transition: background 0.12s, border-color 0.12s, color 0.12s; width: auto; }
+button:hover { border-color: #a8bedf; background: #f5f8ff; }
+.danger       { border-color: #f0bbbb; color: #b73e3e; }
+.danger:hover { border-color: var(--danger); background: var(--danger-bg); }
+.btn-sm { padding: 3px 8px; font-size: 0.73rem; }
+
+/* Active state (connect mode, etc.) */
+button.active       { background: var(--accent); color: #fff; border-color: var(--accent); }
+button.active:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+/* ── Field rows ── */
+h2 { margin: 0 0 8px; font-size: 0.88rem; font-weight: 600; }
+.field { display: grid; grid-template-columns: 72px 1fr; align-items: center; gap: 6px; margin: 5px 0; }
+.field > span { color: var(--muted); font-size: 0.75rem; }
+
+/* ── Left / Right panels ── */
+#leftPanel, #rightPanel { padding: 9px 10px; overflow: auto; }
+
+/* ── Simulation control groups ── */
+.sim-group {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 7px 8px 5px;
+  margin-bottom: 6px;
+  background: #f8fafd;
+}
+.sim-group-label { font-size: 0.7rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+
+.sim-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.sim-results-header h2 { margin: 0; }
+
+#runSimBtn {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  font-weight: 600;
+  padding: 8px;
+  font-size: 0.83rem;
+  letter-spacing: 0.01em;
+  border-radius: var(--radius-sm);
+  margin: 6px 0 10px;
+}
+#runSimBtn:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+/* ── Canvas / workspace ── */
+#workspace {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background-color: var(--canvas);
+  background-image: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1px);
+  background-size: 24px 24px;
+  overflow: hidden;
+}
 #canvas, #linkLayer { position: absolute; inset: 0; }
 #linkLayer { pointer-events: none; z-index: 3; }
-#canvas { z-index: 1; }
-.device { position: absolute; width: 176px; border: 1px solid #c9d8ec; border-radius: 9px; background: #fff; padding: 7px; box-shadow: 0 1px 6px rgba(12, 26, 75, 0.06); cursor: grab; }
-.device.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(47, 109, 246, 0.14); }
-.device-head { display: flex; align-items: center; gap: 6px; }
-.brand-logo { width: 16px; height: 16px; object-fit: contain; }
-.device .title { font-size: 0.84rem; font-weight: 600; line-height: 1.2; }
-.device .meta { color: var(--muted); font-size: 0.7rem; margin-top: 1px; }
-.port-list { margin-top: 6px; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 4px; }
-.port { font-size: 0.7rem; padding: 4px; border-radius: 6px; border: 1px solid #c5d5ea; background: #f9fbff; display: grid; text-align: left; gap: 2px; }
-.policy-badge { color: #5f6f89; font-size: 0.62rem; line-height: 1.1; }
-.section { border: 1px solid var(--line); border-radius: 8px; padding: 7px; margin: 6px 0; background: #fcfdff; }
-.section h3 { margin: 0 0 4px; font-size: 0.8rem; }
-.port-row { border: 1px solid #d7e2f0; border-radius: 7px; padding: 6px; margin-bottom: 6px; background: #fff; }
-.port-row-title { font-size: 0.74rem; color: #35507a; margin-bottom: 4px; font-weight: 600; }
-.inline-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 4px; }
-.log { margin: 0; padding-left: 16px; font-size: 0.78rem; line-height: 1.35; }
-.log li { margin-bottom: 6px; }
-.success { color: var(--success); }
-.fail { color: var(--danger); }
-.link-line { pointer-events: stroke; cursor: pointer; }
+#canvas    { z-index: 1; }
 
-.port-id { pointer-events: none; }
-.policy-badge { pointer-events: none; }
+/* ── Device cards ── */
+.device {
+  position: absolute;
+  width: max-content;
+  min-width: 130px;
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--line-strong);
+  cursor: grab;
+  overflow: hidden;
+  transition: box-shadow 0.15s, border-top-color 0.15s;
+  user-select: none;
+}
+.device:hover    { box-shadow: var(--shadow), 0 0 0 3px var(--line); }
+.device.selected { border-top-color: var(--accent); box-shadow: var(--shadow), 0 0 0 3px var(--accent-bg); }
 
-/* U1 — Connect mode visual indicator */
-button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-button.active:hover { background: #1f5de0; border-color: #1f5de0; }
-.connect-mode-active .port { border-color: var(--accent); cursor: crosshair; }
-.port.pending-start { background: rgba(47, 109, 246, 0.15); border-color: var(--accent); box-shadow: 0 0 0 2px rgba(47, 109, 246, 0.3); }
+.device-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  background: #f0f4fb;
+  border-bottom: 1px solid var(--line);
+}
+.device-head .title { font-size: 0.8rem; font-weight: 600; color: var(--text); line-height: 1.2; white-space: nowrap; }
+.device-head .meta  { font-size: 0.65rem; color: var(--muted); white-space: nowrap; }
+.brand-logo { width: 14px; height: 14px; object-fit: contain; flex-shrink: 0; }
 
-/* U3 — Link hover highlight (stroke colour is set via JS; cursor cue here) */
-.link-line { cursor: pointer; }
+.device-body { padding: 5px 6px 6px; }
 
-/* U4 — Simulation log entry colours already defined (.success, .fail); add info style */
-.log li { color: var(--muted); }
-.log li.success { color: var(--success); }
-.log li.fail    { color: var(--danger); }
+/* ── Port list — horizontal row ── */
+.port-list { display: flex; flex-direction: row; gap: 3px; }
 
-/* U5 — VLAN input real-time validation */
-input.input-error { border-color: var(--danger); background: #fff5f5; outline: none; }
+.port {
+  width: 36px;
+  height: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--line-strong);
+  background: #f6f9ff;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  flex-shrink: 0;
+  gap: 2px;
+}
+.port:hover { background: var(--accent-bg); border-color: var(--accent); }
+
+/* Port mode colour coding */
+.port.port-access  { border-color: var(--success); background: var(--success-bg); }
+.port.port-trunk   { border-color: var(--accent);  background: var(--accent-bg); }
+.port.port-general { border-color: var(--warning);  background: var(--warning-bg); }
+
+/* Connect mode */
+.connect-mode-active .port { cursor: crosshair; }
+.port.pending-start {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+
+.port-id      { font-size: 0.62rem; font-weight: 700; color: var(--text); pointer-events: none; line-height: 1; }
+.policy-badge { font-size: 0.55rem; color: var(--muted); pointer-events: none; line-height: 1; }
+
+/* ── SVG connection lines ── */
+.link-line { fill: none; cursor: pointer; }
+
+/* ── Device editor (right panel) ── */
+.section { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px; margin: 6px 0; background: #fafcff; }
+.section h3 { margin: 0 0 6px; font-size: 0.78rem; font-weight: 600; color: var(--text-soft); }
+.port-row { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 7px; margin-bottom: 5px; background: #fff; }
+.port-row-title { font-size: 0.72rem; color: var(--accent); margin-bottom: 4px; font-weight: 600; }
+.inline-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 5px; }
+
+/* ── Simulation log ── */
+.log { list-style: none; padding: 0; margin: 0; }
+.log li {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.77rem;
+  line-height: 1.45;
+  color: var(--muted);
+  margin-bottom: 1px;
+}
+.log li.success { background: var(--success-bg); color: var(--success); }
+.log li.fail    { background: var(--danger-bg);  color: var(--danger); }
+.log li.separator { border: none; background: none; padding: 0; margin: 5px 0; border-top: 1px solid var(--line); }
+
+/* ── VLAN input validation ── */
+input.input-error { border-color: var(--danger);  background: #fff5f5; outline: none; }
 input.input-valid { border-color: var(--success); }
 
-/* U6 — Field-hint tooltip anchor */
+/* ── Field-hint tooltip ── */
 .field-hint {
   display: inline-flex;
   align-items: center;
@@ -83,9 +254,12 @@ input.input-valid { border-color: var(--success); }
   border-radius: 50%;
   background: #d0ddf0;
   color: #3a5070;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   cursor: help;
   vertical-align: middle;
   margin-left: 2px;
+  flex-shrink: 0;
 }
+
+.muted { color: var(--muted); }

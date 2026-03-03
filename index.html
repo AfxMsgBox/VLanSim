@@ -14,24 +14,37 @@
 
     <div class="toolbar panel" id="topToolbar">
       <div class="toolbar-group" id="devicePalette"></div>
+      <div class="toolbar-divider"></div>
       <div class="toolbar-group">
         <button id="connectModeBtn">连接模式：关闭</button>
         <button id="clearBtn" class="danger">清空拓扑</button>
       </div>
-      <p class="muted tip">提示：开启连接模式后，依次点击两个端口即可连线（一个端口只能连接一条链路）。</p>
+      <p class="tip">提示：开启连接模式后，依次点击两个端口即可连线。按 ESC 退出连接模式。</p>
     </div>
 
     <main>
       <aside class="panel" id="leftPanel">
         <h2>流向模拟</h2>
-        <label class="field"><span>源设备</span><select id="simDeviceSelect"></select></label>
-        <label class="field"><span>源端口</span><select id="simPortSelect"></select></label>
-        <label class="field"><span>目的设备</span><select id="simDstDeviceSelect"></select></label>
-        <label class="field"><span>目的端口</span><select id="simDstPortSelect"></select></label>
-        <label class="field"><span>VLAN ID</span><input id="simVlanInput" type="number" min="1" max="4094" /></label>
-        <button id="runSimBtn">运行模拟</button>
 
-        <h2>模拟结果</h2>
+        <div class="sim-group">
+          <div class="sim-group-label">源</div>
+          <label class="field"><span>设备</span><select id="simDeviceSelect"></select></label>
+          <label class="field"><span>端口</span><select id="simPortSelect"></select></label>
+        </div>
+
+        <div class="sim-group">
+          <div class="sim-group-label">目的</div>
+          <label class="field"><span>设备</span><select id="simDstDeviceSelect"></select></label>
+          <label class="field"><span>端口</span><select id="simDstPortSelect"></select></label>
+        </div>
+
+        <label class="field"><span>VLAN ID</span><input id="simVlanInput" type="number" min="1" max="4094" /></label>
+        <button id="runSimBtn">▶ 运行模拟</button>
+
+        <div class="sim-results-header">
+          <h2>模拟结果</h2>
+          <button id="clearLogBtn" class="btn-sm">清空</button>
+        </div>
         <ol id="simLog" class="log"></ol>
       </aside>
 
