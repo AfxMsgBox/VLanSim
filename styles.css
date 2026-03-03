@@ -55,3 +55,37 @@ button:hover { border-color: #a8bedf; }
 
 .port-id { pointer-events: none; }
 .policy-badge { pointer-events: none; }
+
+/* U1 — Connect mode visual indicator */
+button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+button.active:hover { background: #1f5de0; border-color: #1f5de0; }
+.connect-mode-active .port { border-color: var(--accent); cursor: crosshair; }
+.port.pending-start { background: rgba(47, 109, 246, 0.15); border-color: var(--accent); box-shadow: 0 0 0 2px rgba(47, 109, 246, 0.3); }
+
+/* U3 — Link hover highlight (stroke colour is set via JS; cursor cue here) */
+.link-line { cursor: pointer; }
+
+/* U4 — Simulation log entry colours already defined (.success, .fail); add info style */
+.log li { color: var(--muted); }
+.log li.success { color: var(--success); }
+.log li.fail    { color: var(--danger); }
+
+/* U5 — VLAN input real-time validation */
+input.input-error { border-color: var(--danger); background: #fff5f5; outline: none; }
+input.input-valid { border-color: var(--success); }
+
+/* U6 — Field-hint tooltip anchor */
+.field-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: #d0ddf0;
+  color: #3a5070;
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: help;
+  vertical-align: middle;
+  margin-left: 2px;
+}
